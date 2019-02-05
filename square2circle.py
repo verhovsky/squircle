@@ -40,6 +40,10 @@ def fgs_disc_to_square(u, v):
     u2 = u * u
     v2 = v * v
     r2 = u2 + v2
+
+    if r2 > 1:  # we're outside the disc
+        return
+
     uv = u * v
     fouru2v2 = 4.0 * uv * uv
     rad = r2 * (r2 - fouru2v2)
@@ -63,35 +67,47 @@ def one_coordinates_to_pixels(coordinate, max_value):
     return (coordinate + 1) / 2 * max_value
 
 
-def to_square(circle, method="fgs"):
-    square = np.zeros_like(circle)
+def transform(inp, coordinate_transformer=fgs_square_to_disc):
+    result = np.zeros_like(inp)
 
-    for x, row in enumerate(circle):
+    for x, row in enumerate(inp):
         # TODO: you should be able to extend this stuff to rectangles and ovals
-        if len(row) != len(circle):
+        if len(row) != len(inp):
             raise ValueError(
-                f"The input image must be square shaped, but it's {len(row)} by {len(circle)}"
+                f"The input image must be square shaped, but it's {len(row)} by {len(inp)}"
             )
 
         # convert pixel coordinates to TODO: what is this called?
-        # x and y are in the range(0, len(circle)) but they need to be between -1 and 1
+        # x and y are in the range(0, len(inp)) but they need to be between -1 and 1
         # for the code
-        unit_x = pixel_coordinates_to_one(x, len(circle))
+        unit_x = pixel_coordinates_to_one(x, len(inp))
 
         for y, _ in enumerate(row):
             unit_y = pixel_coordinates_to_one(y, len(row))
 
             try:
-                uv = fgs_square_to_disc(unit_x, unit_y)
+                uv = coordinate_transformer(unit_x, unit_y)
                 if uv is None:
                     continue
                 u, v = uv
 
-                u = one_coordinates_to_pixels(u, len(circle))
+                u = one_coordinates_to_pixels(u, len(inp))
                 v = one_coordinates_to_pixels(v, len(row))
 
-                square[x][y] = circle[floor(u)][floor(v)]  # TODO: average pixels
+                # TODO: something smarter.
+                # maybe take the average of the nearest 4 pixels
+                result[x][y] = inp[floor(u)][floor(v)]
             except IndexError:
                 pass
 
-    return square
+    return result
+
+
+def to_square(circle, method="fgs"):
+    # TODO: using square_to_disc to convert discs to squares is unintuitive
+    return transform(circle, fgs_square_to_disc)
+
+
+def to_circle(square, method="fgs"):
+    # TODO: using disc_to_square to convert squares to discs is unintuitive
+    return transform(square, fgs_disc_to_square)

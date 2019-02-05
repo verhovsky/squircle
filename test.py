@@ -10,3 +10,7 @@ square = square2circle.to_square(circle)
 
 plt.imshow(square)
 plt.show()
+
+circle_back = square2circle.to_circle(square)
+plt.imshow(circle_back)
+plt.show()
