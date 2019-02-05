@@ -55,24 +55,43 @@ def fgs_disc_to_square(u, v):
     return x, y
 
 
+def pixel_coordinates_to_one(coordinate, max_value):
+    return coordinate / max_value * 2 - 1
+
+
+def one_coordinates_to_pixels(coordinate, max_value):
+    return (coordinate + 1) / 2 * max_value
+
+
 def to_square(circle, method="fgs"):
     square = np.zeros_like(circle)
+
     for x, row in enumerate(circle):
-        unit_x = ((x / len(circle)) - 0.5) * 2
+        # TODO: you should be able to extend this stuff to rectangles and ovals
+        if len(row) != len(circle):
+            raise ValueError(
+                f"The input image must be square shaped, but it's {len(row)} by {len(circle)}"
+            )
+
+        # convert pixel coordinates to TODO: what is this called?
+        # x and y are in the range(0, len(circle)) but they need to be between -1 and 1
+        # for the code
+        unit_x = pixel_coordinates_to_one(x, len(circle))
+
         for y, _ in enumerate(row):
-            unit_y = ((y / len(row)) - 0.5) * 2
+            unit_y = pixel_coordinates_to_one(y, len(row))
+
             try:
                 uv = fgs_square_to_disc(unit_x, unit_y)
                 if uv is None:
                     continue
                 u, v = uv
 
-                u = ((u + 1) / 2) * len(circle)
-                v = ((v + 1) / 2) * len(row)
+                u = one_coordinates_to_pixels(u, len(circle))
+                v = one_coordinates_to_pixels(v, len(row))
 
-                square[x][y] = circle[floor(u)][floor(v)]
-            except IndexError as e:
-                # pass
-                print(e)
-                print(x, y)
+                square[x][y] = circle[floor(u)][floor(v)]  # TODO: average pixels
+            except IndexError:
+                pass
+
     return square
