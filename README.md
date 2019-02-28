@@ -3,7 +3,7 @@
 ### Usage:
 
 ```python
-from square2disc import to_disc, to_square
+from squircle import to_disc, to_square
 from PIL import Image
 
 square = np.asarray(Image.open('some-square-image.jpg'))
@@ -14,7 +14,7 @@ and_back_to_square = to_square(disc)
 there's 3 stretching methods you can choose from
 
 ```python
->>> from square2disc import methods
+>>> from squircle import methods
 >>> list(methods.keys())
 ['fgs', 'simple_stretch', 'elliptical']
 >>> disc = to_disc(square, method='elliptical')
