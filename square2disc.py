@@ -14,6 +14,7 @@ def sgn(x):
     return 1.0
 
 
+# https://squircular.blogspot.com/2015/09/fg-squircle-mapping.html
 def fgs_square_to_disc(x, y):
     x2 = x * x
     y2 = y * y
@@ -59,6 +60,7 @@ def fgs_disc_to_square(u, v):
     return x, y
 
 
+# https://squircular.blogspot.com/2015/09/elliptical-arc-mapping.html
 def simple_stretch_disc_to_square(u, v):
     if (abs(u) < epsilon) or (abs(v) < epsilon):
         return u, v
@@ -98,6 +100,26 @@ def simple_stretch_square_to_disc(x, y):
         multiplier = sgn(y) * y * reciprocal_hypotenuse
 
     return x * multiplier, y * multiplier
+
+
+# https://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
+def elliptical_disc_to_square(u, v):
+    u2 = u * u
+    v2 = v * v
+    twosqrt2 = 2.0 * sqrt(2.0)
+    subtermx = 2.0 + u2 - v2
+    subtermy = 2.0 - u2 + v2
+    termx1 = subtermx + u * twosqrt2
+    termx2 = subtermx - u * twosqrt2
+    termy1 = subtermy + v * twosqrt2
+    termy2 = subtermy - v * twosqrt2
+    x = 0.5 * sqrt(termx1) - 0.5 * sqrt(termx2)
+    y = 0.5 * sqrt(termy1) - 0.5 * sqrt(termy2)
+    return x, y
+
+
+def elliptical_square_to_disc(x, y):
+    return x * sqrt(1.0 - y * y / 2.0), y * sqrt(1.0 - x * x / 2.0)
 
 
 # if the coordinate is an index in an image it's between 0 and the length of the image
@@ -159,6 +181,12 @@ methods = {
         "to_square": simple_stretch_disc_to_square,
         "to_disc": simple_stretch_square_to_disc,
     },
+    "elliptical": {
+        "to_square": elliptical_disc_to_square,
+        "to_disc": elliptical_square_to_disc,
+    },
+    # TODO: Schwarz-Christoffel
+    # https://squircular.blogspot.com/2015/09/schwarz-christoffel-mapping.html
 }
 
 
