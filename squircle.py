@@ -14,6 +14,49 @@ def sgn(x):
     return 1.0
 
 
+# https://squircular.blogspot.com/2015/09/elliptical-arc-mapping.html
+def simple_stretch_square_to_disc(x, y):
+    if (abs(x) < epsilon) or (abs(y) < epsilon):
+        return x, y
+
+    x2 = x * x
+    y2 = y * y
+    hypotenuse_squared = x * x + y * y
+
+    # code can use fast reciprocal sqrt floating point trick
+    # https://en.wikipedia.org/wiki/Fast_inverse_square_root
+    reciprocal_hypotenuse = 1.0 / sqrt(hypotenuse_squared)
+
+    multiplier = 1.0
+    # a trick based on Dave Cline's idea
+    # if abs(x2) > abs(y2):
+    if x2 > y2:
+        multiplier = sgn(x) * x * reciprocal_hypotenuse
+    else:
+        multiplier = sgn(y) * y * reciprocal_hypotenuse
+
+    return x * multiplier, y * multiplier
+
+
+# TODO: doesn't work
+def simple_stretch_disc_to_square(u, v):
+    if (abs(u) < epsilon) or (abs(v) < epsilon):
+        return u, v
+
+    u2 = u * u
+    v2 = v * v
+    r = sqrt(u2 + v2)
+
+    # a trick based on Dave Cline's idea
+    # link Peter Shirley's blog
+    if u2 >= v2:
+        sgnu = sgn(u)
+        return sgnu * r, sgnu * r * v / u
+    else:
+        sgnv = sgn(v)
+        return sgnv * r * u / v, sgnv * r
+
+
 # https://squircular.blogspot.com/2015/09/fg-squircle-mapping.html
 def fgs_square_to_disc(x, y):
     x2 = x * x
@@ -60,49 +103,13 @@ def fgs_disc_to_square(u, v):
     return x, y
 
 
-# https://squircular.blogspot.com/2015/09/elliptical-arc-mapping.html
-def simple_stretch_disc_to_square(u, v):
-    if (abs(u) < epsilon) or (abs(v) < epsilon):
-        return u, v
-
-    u2 = u * u
-    v2 = v * v
-    r = sqrt(u2 + v2)
-
-    # a trick based on Dave Cline's idea
-    # link Peter Shirley's blog
-    if u2 >= v2:
-        sgnu = sgn(u)
-        return sgnu * r, sgnu * r * v / u
-    else:
-        sgnv = sgn(v)
-        return sgnv * r * u / v, sgnv * r
-
-
-def simple_stretch_square_to_disc(x, y):
-    if (abs(x) < epsilon) or (abs(y) < epsilon):
-        return x, y
-
-    x2 = x * x
-    y2 = y * y
-    hypotenuse_squared = x * x + y * y
-
-    # code can use fast reciprocal sqrt floating point trick
-    # https://en.wikipedia.org/wiki/Fast_inverse_square_root
-    reciprocal_hypotenuse = 1.0 / sqrt(hypotenuse_squared)
-
-    multiplier = 1.0
-    # a trick based on Dave Cline's idea
-    # if abs(x2) > abs(y2):
-    if x2 > y2:
-        multiplier = sgn(x) * x * reciprocal_hypotenuse
-    else:
-        multiplier = sgn(y) * y * reciprocal_hypotenuse
-
-    return x * multiplier, y * multiplier
+# TODO: doesn't work
+def elliptical_square_to_disc(x, y):
+    return x * sqrt(1.0 - y * y / 2.0), y * sqrt(1.0 - x * x / 2.0)
 
 
 # https://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
+# TODO: doesn't work
 def elliptical_disc_to_square(u, v):
     u2 = u * u
     v2 = v * v
@@ -116,10 +123,6 @@ def elliptical_disc_to_square(u, v):
     x = 0.5 * sqrt(termx1) - 0.5 * sqrt(termx2)
     y = 0.5 * sqrt(termy1) - 0.5 * sqrt(termy2)
     return x, y
-
-
-def elliptical_square_to_disc(x, y):
-    return x * sqrt(1.0 - y * y / 2.0), y * sqrt(1.0 - x * x / 2.0)
 
 
 # if the coordinate is an index in an image it's between 0 and the length of the image
