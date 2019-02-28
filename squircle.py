@@ -15,7 +15,7 @@ def sgn(x):
 
 
 # https://squircular.blogspot.com/2015/09/elliptical-arc-mapping.html
-def simple_stretch_square_to_disc(x, y):
+def stretch_square_to_disc(x, y):
     if (abs(x) < epsilon) or (abs(y) < epsilon):
         return x, y
 
@@ -39,7 +39,7 @@ def simple_stretch_square_to_disc(x, y):
 
 
 # TODO: goes outside circle bounds in the left and on top
-def simple_stretch_disc_to_square(u, v):
+def stretch_disc_to_square(u, v):
     if (abs(u) < epsilon) or (abs(v) < epsilon):
         return u, v
 
@@ -187,9 +187,9 @@ def transform(inp, coordinate_transformer=fgs_square_to_disc):
 
 methods = {
     "fgs": {"to_square": fgs_disc_to_square, "to_disc": fgs_square_to_disc},
-    "simple_stretch": {
-        "to_square": simple_stretch_disc_to_square,
-        "to_disc": simple_stretch_square_to_disc,
+    "stretch": {
+        "to_square": stretch_disc_to_square,
+        "to_disc": stretch_square_to_disc,
     },
     "elliptical": {
         "to_square": elliptical_disc_to_square,
