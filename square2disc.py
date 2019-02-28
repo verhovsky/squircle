@@ -59,6 +59,49 @@ def fgs_disc_to_square(u, v):
     return x, y
 
 
+def simple_stretch_disc_to_square(u, v):
+    if (abs(u) < epsilon) or (abs(v) < epsilon):
+        return u, v
+
+    u2 = u * u
+    v2 = v * v
+    r = sqrt(u2 + v2)
+
+    # a trick based on Dave Cline's idea
+    # link Peter Shirley's blog
+    if u2 >= v2:
+        sgnu = sgn(u)
+        return sgnu * r, sgnu * r * v / u
+    else:
+        sgnv = sgn(v)
+        return sgnv * r * u / v, sgnv * r
+
+
+def simple_stretch_square_to_disc(x, y):
+    if (abs(x) < epsilon) or (abs(y) < epsilon):
+        return x, y
+
+    x2 = x * x
+    y2 = y * y
+    hypotenuse_squared = x * x + y * y
+
+    # code can use fast reciprocal sqrt floating point trick
+    # https://en.wikipedia.org/wiki/Fast_inverse_square_root
+    reciprocal_hypotenuse = 1.0 / sqrt(hypotenuse_squared)
+
+    multiplier = 1.0
+    # a trick based on Dave Cline's idea
+    # if abs(x2) > abs(y2):
+    if x2 > y2:
+        multiplier = sgn(x) * x * reciprocal_hypotenuse
+    else:
+        multiplier = sgn(y) * y * reciprocal_hypotenuse
+
+    return x * multiplier, y * multiplier
+
+
+# if the coordinate is an index in an image it's between 0 and the length of the image
+# we need it to be between -1 and 1 for the math
 def pixel_coordinates_to_one(coordinate, max_value):
     return coordinate / max_value * 2 - 1
 
@@ -67,17 +110,24 @@ def one_coordinates_to_pixels(coordinate, max_value):
     return (coordinate + 1) / 2 * max_value
 
 
+def check_that_all_sides_are_the_same_length(inp):
+    for x, row in enumerate(inp):
+        if len(row) != len(inp):
+            raise ValueError(
+                f"The input image must be square shaped but row {x} "
+                f"is {len(row)} pixels accross, while the other side of the "
+                f"image is {len(inp)}"
+            )
+
+
 def transform(inp, coordinate_transformer=fgs_square_to_disc):
+    # TODO: you should be able to extend this to rectangles and ovals
+    check_that_all_sides_are_the_same_length(inp)
+
     result = np.zeros_like(inp)
 
     for x, row in enumerate(inp):
-        # TODO: you should be able to extend this stuff to rectangles and ovals
-        if len(row) != len(inp):
-            raise ValueError(
-                f"The input image must be square shaped, but it's {len(row)} by {len(inp)}"
-            )
-
-        # convert pixel coordinates to TODO: what is this called?
+        # convert pixel coordinates to TODO: what is this called? it's not a unit square
         # x and y are in the range(0, len(inp)) but they need to be between -1 and 1
         # for the code
         unit_x = pixel_coordinates_to_one(x, len(inp))
@@ -103,11 +153,30 @@ def transform(inp, coordinate_transformer=fgs_square_to_disc):
     return result
 
 
-def to_square(circle, method="fgs"):
-    # TODO: using square_to_disc to convert discs to squares is unintuitive
-    return transform(circle, fgs_square_to_disc)
+methods = {
+    "fgs": {"to_square": fgs_disc_to_square, "to_disc": fgs_square_to_disc},
+    "simple_stretch": {
+        "to_square": simple_stretch_disc_to_square,
+        "to_disc": simple_stretch_square_to_disc,
+    },
+}
 
 
-def to_circle(square, method="fgs"):
-    # TODO: using disc_to_square to convert squares to discs is unintuitive
-    return transform(square, fgs_disc_to_square)
+def check_method_is_valid(method):
+    if method not in methods:
+        raise ValueError(
+            f'"{method}" is not a valid method. '
+            f'The choices are {" and ".join(", ".join(methods.keys()).rsplit(", ", 1))}.'
+        )
+
+
+def to_square(disk, method="fgs"):
+    check_method_is_valid(method)
+    # using square_to_disc to convert discs to squares is counterintuitive
+    return transform(disk, methods[method]["to_disc"])
+
+
+def to_disk(square, method="fgs"):
+    check_method_is_valid(method)
+    # using disc_to_square to convert squares to discs is counterintuitive
+    return transform(square, methods[method]["to_square"])
