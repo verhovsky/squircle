@@ -20,7 +20,7 @@ def test_method(method_name, filename="test/retina.jpg"):
     plt.show()
 
 
-# for method in squircle.methods:
-#     test_method(method)
+for method in squircle.methods:
+    test_method(method)
 
-test_method("simple_stretch")
+# test_method("simple_stretch")

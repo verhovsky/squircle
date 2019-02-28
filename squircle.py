@@ -38,7 +38,7 @@ def simple_stretch_square_to_disc(x, y):
     return x * multiplier, y * multiplier
 
 
-# TODO: doesn't work
+# TODO: goes outside circle bounds in the left and on top
 def simple_stretch_disc_to_square(u, v):
     if (abs(u) < epsilon) or (abs(v) < epsilon):
         return u, v
@@ -48,7 +48,7 @@ def simple_stretch_disc_to_square(u, v):
     r = sqrt(u2 + v2)
 
     # a trick based on Dave Cline's idea
-    # link Peter Shirley's blog
+    # http://psgraphics.blogspot.com/2011/01/improved-code-for-concentric-map.html
     if u2 >= v2:
         sgnu = sgn(u)
         return sgnu * r, sgnu * r * v / u
@@ -103,13 +103,15 @@ def fgs_disc_to_square(u, v):
     return x, y
 
 
-# TODO: doesn't work
-def elliptical_square_to_disc(x, y):
-    return x * sqrt(1.0 - y * y / 2.0), y * sqrt(1.0 - x * x / 2.0)
-
-
 # https://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
-# TODO: doesn't work
+def elliptical_square_to_disc(x, y):
+    try:
+        return x * sqrt(1.0 - y * y / 2.0), y * sqrt(1.0 - x * x / 2.0)
+    except ValueError:  # sqrt of a negative number
+        return None
+
+
+# TODO: goes outside original circle in some places
 def elliptical_disc_to_square(u, v):
     u2 = u * u
     v2 = v * v
@@ -120,9 +122,12 @@ def elliptical_disc_to_square(u, v):
     termx2 = subtermx - u * twosqrt2
     termy1 = subtermy + v * twosqrt2
     termy2 = subtermy - v * twosqrt2
-    x = 0.5 * sqrt(termx1) - 0.5 * sqrt(termx2)
-    y = 0.5 * sqrt(termy1) - 0.5 * sqrt(termy2)
-    return x, y
+    try:
+        x = 0.5 * sqrt(termx1) - 0.5 * sqrt(termx2)
+        y = 0.5 * sqrt(termy1) - 0.5 * sqrt(termy2)
+        return x, y
+    except ValueError:  # sqrt of a negative number
+        return None
 
 
 # if the coordinate is an index in an image it's between 0 and the length of the image
