@@ -4,16 +4,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-circle = np.asarray(Image.open("test/retina.jpg"))
+def test_method(method_name, filename="test/retina.jpg"):
+    circle = np.asarray(Image.open(filename))
 
-square = squircle.to_square(circle)
+    square = squircle.to_square(circle, method_name)
 
-plt.imshow(square)
-plt.title = "Circular image converted to square"
-plt.show()
+    plt.imshow(square)
+    plt.title = "Circular image converted to square"
+    plt.show()
 
-circle_back = squircle.to_disk(square)
+    circle_back = squircle.to_disk(square, method_name)
 
-plt.imshow(circle_back)
-plt.title = "Square image converted back to circle"
-plt.show()
+    plt.imshow(circle_back)
+    plt.title = "Square image converted back to circle"
+    plt.show()
+
+
+# for method in squircle.methods:
+#     test_method(method)
+
+test_method("simple_stretch")
