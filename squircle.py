@@ -152,6 +152,8 @@ def check_that_all_sides_are_the_same_length(inp):
 
 def transform(inp, coordinate_transformer=fgs_square_to_disc):
     # TODO: you should be able to extend this to rectangles and ovals
+    # Elliptification of Rectangular Imagery by C Fong - ‎2017
+    # https://arxiv.org/pdf/1709.07875.pdf
     check_that_all_sides_are_the_same_length(inp)
 
     result = np.zeros_like(inp)
