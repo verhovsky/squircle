@@ -16,16 +16,15 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 
-description = (
-    "`squircle.py` is a Python 3 utility for stretching discs/circles "
-    "into squares and squishing squares into discs/circles"
-)
-
+with open("README.md") as f:
+    long_description = f.read()
 
 setup(
     name="squircle",
     version="0.1",
-    description=description,
+    description="Stretch discs/circles into squares and squish squares into discs/circles",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     classifiers=CLASSIFIERS,
     license="MIT",
     install_requires=["numpy"],
