@@ -24,7 +24,7 @@ there's 3 stretching methods you can choose from
 
 ##### Fernández-Guasti squircle (`fgs`) 
 
-The Fernández-Guasti squircle (`fgs`) is used by default.
+The Fernández-Guasti squircle is used by default.
 
 https://squircular.blogspot.com/2015/09/fernandez-guastis-squircle.html
 
@@ -46,7 +46,7 @@ https://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
 
 ##### Schwarz-Christoffel conformal mapping
 
-`raise NotImplementedError`. The math is allegedly difficult.
+`raise NotImplementedError`. The math is difficult.
 
 https://squircular.blogspot.com/2015/09/schwarz-christoffel-mapping.html
 
