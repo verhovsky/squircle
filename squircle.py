@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
-from math import sqrt, floor, ceil
-
-_epsilon = 0.0000000001
+from math import sqrt as _sqrt, floor as _floor
 
 try:
-    import numpy as np
+    import numpy as _np
 
     _HAS_NUMPY = True
 except ImportError:
     _HAS_NUMPY = False
+
+_epsilon = 0.0000000001
 
 
 def _sgn(x):
@@ -31,7 +31,7 @@ def _stretch_square_to_disc(x, y):
 
     # code can use fast reciprocal sqrt floating point trick
     # https://en.wikipedia.org/wiki/Fast_inverse_square_root
-    reciprocal_hypotenuse = 1.0 / sqrt(hypotenuse_squared)
+    reciprocal_hypotenuse = 1.0 / _sqrt(hypotenuse_squared)
 
     multiplier = 1.0
     # a trick based on Dave Cline's idea
@@ -51,7 +51,7 @@ def _stretch_disc_to_square(u, v):
 
     u2 = u * u
     v2 = v * v
-    r = sqrt(u2 + v2)
+    r = _sqrt(u2 + v2)
 
     # a trick based on Dave Cline's idea
     # http://psgraphics.blogspot.com/2011/01/improved-code-for-concentric-map.html
@@ -68,7 +68,7 @@ def _fgs_square_to_disc(x, y):
     x2 = x * x
     y2 = y * y
     r2 = x2 + y2
-    rad = sqrt(r2 - x2 * y2)
+    rad = _sqrt(r2 - x2 * y2)
 
     # avoid division by zero if (x,y) is close to origin
     if r2 < _epsilon:
@@ -76,7 +76,7 @@ def _fgs_square_to_disc(x, y):
 
     # This code is amenable to the fast reciprocal sqrt floating point trick
     # https://en.wikipedia.org/wiki/Fast_inverse_square_root
-    reciprocal_sqrt = 1.0 / sqrt(r2)
+    reciprocal_sqrt = 1.0 / _sqrt(r2)
 
     u = x * rad * reciprocal_sqrt
     v = y * rad * reciprocal_sqrt
@@ -98,7 +98,7 @@ def _fgs_disc_to_square(u, v):
     fouru2v2 = 4.0 * uv * uv
     rad = r2 * (r2 - fouru2v2)
     sgnuv = _sgn(uv)
-    sqrto = sqrt(0.5 * (r2 - sqrt(rad)))
+    sqrto = _sqrt(0.5 * (r2 - _sqrt(rad)))
 
     if abs(u) > _epsilon:
         y = sgnuv / u * sqrto
@@ -112,7 +112,7 @@ def _fgs_disc_to_square(u, v):
 # https://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
 def _elliptical_square_to_disc(x, y):
     try:
-        return x * sqrt(1.0 - y * y / 2.0), y * sqrt(1.0 - x * x / 2.0)
+        return x * _sqrt(1.0 - y * y / 2.0), y * _sqrt(1.0 - x * x / 2.0)
     except ValueError:  # sqrt of a negative number
         return None
 
@@ -121,7 +121,7 @@ def _elliptical_square_to_disc(x, y):
 def _elliptical_disc_to_square(u, v):
     u2 = u * u
     v2 = v * v
-    twosqrt2 = 2.0 * sqrt(2.0)
+    twosqrt2 = 2.0 * _sqrt(2.0)
     subtermx = 2.0 + u2 - v2
     subtermy = 2.0 - u2 + v2
     termx1 = subtermx + u * twosqrt2
@@ -129,8 +129,8 @@ def _elliptical_disc_to_square(u, v):
     termy1 = subtermy + v * twosqrt2
     termy2 = subtermy - v * twosqrt2
     try:
-        x = 0.5 * sqrt(termx1) - 0.5 * sqrt(termx2)
-        y = 0.5 * sqrt(termy1) - 0.5 * sqrt(termy2)
+        x = 0.5 * _sqrt(termx1) - 0.5 * _sqrt(termx2)
+        y = 0.5 * _sqrt(termy1) - 0.5 * _sqrt(termy2)
         return x, y
     except ValueError:  # sqrt of a negative number
         return None
@@ -162,8 +162,8 @@ def _transform(inp, coordinate_transformer=_fgs_square_to_disc):
     # https://arxiv.org/pdf/1709.07875.pdf
     _check_that_all_sides_are_the_same_length(inp)
 
-    if _HAS_NUMPY and isinstance(inp, np.ndarray):
-        result = np.zeros_like(inp)
+    if _HAS_NUMPY and isinstance(inp, _np.ndarray):
+        result = _np.zeros_like(inp)
     else:
         result = [[0] * len(inp) for _ in inp]
 
@@ -187,7 +187,7 @@ def _transform(inp, coordinate_transformer=_fgs_square_to_disc):
 
                 # TODO: something smarter than flooring.
                 # maybe take a weighted average of the nearest 4 pixels
-                result[x][y] = inp[floor(u)][floor(v)]
+                result[x][y] = inp[_floor(u)][_floor(v)]
             except IndexError:
                 pass
 
