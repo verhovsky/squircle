@@ -21,13 +21,14 @@ with open("README.md") as f:
 
 setup(
     name="squircle",
-    version="0.0.1",
+    version="0.0.2",
     description="Stretch discs/circles into squares and squish squares into discs/circles",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=CLASSIFIERS,
     license="MIT",
     install_requires=["numpy"],
+    extras_require={"dev": ["pytest"]},
     packages=find_packages(),
     py_modules=["squircle"],
     author="Boris Verkhovskiy",
