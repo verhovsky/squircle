@@ -33,5 +33,4 @@ setup(
     author="Boris Verkhovskiy",
     author_email="boris@verhovs.ky",
     url="https://github.com/verhovsky/squircle",
-    test_suite="test",
 )
