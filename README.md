@@ -1,4 +1,6 @@
-[`squircle.py`](https://pypi.org/project/squircle/) is a Python utility for stretching disks/circles into squares and squishing squares into circles. It requires Python 3.6 or later. It has no external dependencies but works with numpy if you have it.
+[`squircle.py`](https://pypi.org/project/squircle/) is a Python utility for
+stretching circles into squares and squishing squares into circles. It requires
+Python 3.6 or later.
 
 ### Installation
 
@@ -9,12 +11,12 @@ pip insall squircle
 ### Usage:
 
 ```python
-from squircle import to_disc, to_square
+from squircle import to_circle, to_square
 from PIL import Image
 
 square = np.asarray(Image.open('some-square-image.jpg'))
-disc = to_disc(square)
-and_back_to_square = to_square(disc)
+circle = to_circle(square)
+and_back_to_square = to_square(circle)
 ```
 
 there's 3 stretching methods you can choose from
@@ -23,12 +25,12 @@ there's 3 stretching methods you can choose from
 >>> from squircle import methods
 >>> list(methods.keys())
 ['fgs', 'stretch', 'elliptical']
->>> disc = to_disc(square, method='elliptical')
+>>> circle = to_circle(square, method='elliptical')
 ```
 
 #### Stretching methods
 
-##### Fernández-Guasti squircle (`fgs`) 
+##### Fernández-Guasti squircle (`fgs`)
 
 The Fernández-Guasti squircle is used by default.
 
@@ -63,3 +65,18 @@ http://jcgt.org/published/0005/02/01/
 This code is converted from the C++ sources on Chamberlain Fong's blog posts, which (I think) is based on his paper [Analytical Methods for Squaring the Disc by C Fong 2014](https://arxiv.org/ftp/arxiv/papers/1509/1509.06344.pdf).
 
 Squircle doesn't handle ellipses/rectangles, this more recent paper should be useful: [Elliptification of Rectangular Imagery by C Fong - ‎2017](https://arxiv.org/pdf/1709.07875.pdf)
+
+
+### Development
+
+After `pip install tox` you can run squircle's (limited) test set with
+
+```sh
+tox
+```
+
+On Ubuntu, you also need the following dependencies for numpy and matplotlib
+
+```sh
+sudo apt install python3-dev libjpeg-dev zlib1g-dev libfreetype6-dev
+```

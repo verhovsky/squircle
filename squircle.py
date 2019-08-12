@@ -219,7 +219,7 @@ def to_square(disk, method="fgs"):
     return _transform(disk, methods[method]["to_disc"])
 
 
-def to_disk(square, method="fgs"):
+def to_circle(square, method="fgs"):
     if method not in methods:
         raise ValueError(
             f'"{method}" is not a valid method. '
@@ -227,3 +227,15 @@ def to_disk(square, method="fgs"):
         )
     # using disc_to_square to convert squares to discs is counterintuitive
     return _transform(square, methods[method]["to_square"])
+
+
+def to_disk(square, method="fgs"):
+    import warnings
+
+    warnings.warn(
+        "to_disk has been deprecated due to possible confusion "
+        "between the spelling of disc and disk. Please use to_circle() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return to_circle(square, method)

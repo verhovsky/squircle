@@ -32,17 +32,17 @@ def test_dimensions_remain_the_same():
     old_height = len(square)
     old_width = len(square[0])
 
-    disc = squircle.to_disk(square)
+    circle = squircle.to_circle(square)
 
-    assert old_height == len(disc)
-    assert old_width == len(disc[0])
+    assert old_height == len(circle)
+    assert old_width == len(circle[0])
 
 
 def test_mismatched_height_and_width_errors_out():
     square = read_image(square_image)
     rectangle = np.vstack((square, square))
     with pytest.raises(ValueError):
-        squircle.to_disk(rectangle)
+        squircle.to_circle(rectangle)
 
 
 @pytest.mark.parametrize("filename", (square_image,))
@@ -51,14 +51,14 @@ def test_mismatched_height_and_width_errors_out():
 def test_method(filename, method_name, use_numpy):
     square = read_image(filename, use_numpy)
 
-    disk = squircle.to_disk(square, method_name)
+    circle = squircle.to_circle(square, method_name)
     back_to_square = squircle.to_square(square, method_name)
 
     assert len(square) == len(back_to_square)
     assert len(square[0]) == len(back_to_square[0])
 
-    assert not np.any(np.isnan(disk))
-    assert not np.any(np.isinf(disk))
+    assert not np.any(np.isnan(circle))
+    assert not np.any(np.isinf(circle))
     assert not np.any(np.isnan(back_to_square))
     assert not np.any(np.isinf(back_to_square))
 
@@ -78,7 +78,7 @@ def test_method(filename, method_name, use_numpy):
     # plt.subplot(1, 3, 1)
     # plt.imshow(square)
     # plt.subplot(1, 3, 2)
-    # plt.imshow(disk)
+    # plt.imshow(circle)
     # plt.subplot(1, 3, 3)
     # plt.imshow(back_to_square)
     # plt.show()
