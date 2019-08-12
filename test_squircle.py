@@ -5,20 +5,7 @@ import math
 from pathlib import Path
 import pytest
 import itertools
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--visual",
-        action="store",
-        default="type1",
-        help="whether to display the results of conversion using matplotlib",
-    )
-
-
-@pytest.fixture
-def visual(request):
-    return request.config.getoption("--visual")
+from matplotlib import pyplot as plt
 
 
 square_image = Path("test_images/square_grid.png")
@@ -58,13 +45,14 @@ def test_mismatched_height_and_width_errors_out():
         squircle.to_disk(rectangle)
 
 
+@pytest.mark.parametrize("filename", (square_image,))
 @pytest.mark.parametrize("method_name", squircle.methods)
 @pytest.mark.parametrize("use_numpy", (True, False))
-def test_method(method_name, use_numpy):
-    square = read_image(square_image, use_numpy)
+def test_method(filename, method_name, use_numpy):
+    square = read_image(filename, use_numpy)
 
     disk = squircle.to_disk(square, method_name)
-    back_to_square = squircle.to_disk(square, method_name)
+    back_to_square = squircle.to_square(square, method_name)
 
     assert len(square) == len(back_to_square)
     assert len(square[0]) == len(back_to_square[0])
@@ -82,19 +70,16 @@ def test_method(method_name, use_numpy):
             for x, y in zip(square_row, back_to_square_row):
                 total_difference += abs(x - y)
 
-    # TODO: this is way too high
-    assert total_difference < 10000000
+    average_difference = total_difference / (len(square) * len(square))
+    # TODO: this is too high
+    assert average_difference < 30
 
-    # if visual:
-    #     import matplotlib.pyplot as plt
-
-    #     plt.imshow(square)
-    #     plt.title = "Circular image converted to square"
-    #     plt.show()
-    #     plt.imshow(disc)
-    #     plt.title = "Circular image converted to square"
-    #     plt.show()
-    #     plt.imshow(back_to_square)
-    #     plt.title = "Circular image converted to square"
-    #     plt.show()
+    # TODO: how do I pass a command line argument to a parametrized test?
+    # plt.subplot(1, 3, 1)
+    # plt.imshow(square)
+    # plt.subplot(1, 3, 2)
+    # plt.imshow(disk)
+    # plt.subplot(1, 3, 3)
+    # plt.imshow(back_to_square)
+    # plt.show()
 

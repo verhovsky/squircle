@@ -1,4 +1,10 @@
-`squircle.py` is a Python 3 utility for stretching discs/circles into squares and squishing squares into discs/circles
+[`squircle.py`](https://pypi.org/project/squircle/) is a Python utility for stretching disks/circles into squares and squishing squares into circles. It requires Python 3.6 or later. It has no external dependencies but works with numpy if you have it.
+
+### Installation
+
+```sh
+pip insall squircle
+```
 
 ### Usage:
 
