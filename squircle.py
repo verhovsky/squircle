@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from math import sqrt as _sqrt, floor as _floor
+from collections.abc import Iterable as _Iterable
 
 try:
     import numpy as _np
@@ -156,16 +157,27 @@ def _check_that_all_sides_are_the_same_length(inp):
             )
 
 
+def _get_zero_pixel_value(pixel):
+    if isinstance(pixel, _Iterable):
+        return type(pixel)(0 for _ in pixel)
+    return 0
+
+
+def _zeros_like(inp):
+    if _HAS_NUMPY and isinstance(inp, _np.ndarray):
+        return _np.zeros_like(inp)
+
+    zero = _get_zero_pixel_value(inp[0][0])
+    return [[zero] * len(inp) for _ in inp]
+
+
 def _transform(inp, coordinate_transformer=_fgs_square_to_disc):
     # TODO: you should be able to extend this to rectangles and ovals
     # Elliptification of Rectangular Imagery by C Fong - ‎2017
     # https://arxiv.org/pdf/1709.07875.pdf
     _check_that_all_sides_are_the_same_length(inp)
 
-    if _HAS_NUMPY and isinstance(inp, _np.ndarray):
-        result = _np.zeros_like(inp)
-    else:
-        result = [[0] * len(inp) for _ in inp]
+    result = _zeros_like(inp)
 
     for x, row in enumerate(inp):
         # convert pixel coordinates to TODO: what is this called? it's not a unit square
