@@ -5,7 +5,7 @@ Python 3.6 or later.
 ### Installation
 
 ```sh
-pip insall squircle
+pip install squircle
 ```
 
 ### Usage:
