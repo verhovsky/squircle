@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from math import sqrt as _sqrt, floor as _floor
-from collections.abc import Iterable as _Iterable
+import math
+import collections.abc
 
 try:
-    import numpy as _np
+    import numpy
 
     _HAS_NUMPY = True
 except ImportError:
@@ -32,7 +32,7 @@ def _stretch_square_to_disc(x, y):
 
     # code can use fast reciprocal sqrt floating point trick
     # https://en.wikipedia.org/wiki/Fast_inverse_square_root
-    reciprocal_hypotenuse = 1.0 / _sqrt(hypotenuse_squared)
+    reciprocal_hypotenuse = 1.0 / math.sqrt(hypotenuse_squared)
 
     multiplier = 1.0
     # a trick based on Dave Cline's idea
@@ -45,14 +45,18 @@ def _stretch_square_to_disc(x, y):
     return x * multiplier, y * multiplier
 
 
-# TODO: goes outside circle bounds in the left and on top
 def _stretch_disc_to_square(u, v):
     if (abs(u) < _epsilon) or (abs(v) < _epsilon):
         return u, v
 
     u2 = u * u
     v2 = v * v
-    r = _sqrt(u2 + v2)
+    r2 = u2 + v2
+
+    if r2 > 1:  # we're outside the disc
+        return
+
+    r = math.sqrt(r2)
 
     # a trick based on Dave Cline's idea
     # http://psgraphics.blogspot.com/2011/01/improved-code-for-concentric-map.html
@@ -69,7 +73,7 @@ def _fgs_square_to_disc(x, y):
     x2 = x * x
     y2 = y * y
     r2 = x2 + y2
-    rad = _sqrt(r2 - x2 * y2)
+    rad = math.sqrt(r2 - x2 * y2)
 
     # avoid division by zero if (x,y) is close to origin
     if r2 < _epsilon:
@@ -77,7 +81,7 @@ def _fgs_square_to_disc(x, y):
 
     # This code is amenable to the fast reciprocal sqrt floating point trick
     # https://en.wikipedia.org/wiki/Fast_inverse_square_root
-    reciprocal_sqrt = 1.0 / _sqrt(r2)
+    reciprocal_sqrt = 1.0 / math.sqrt(r2)
 
     u = x * rad * reciprocal_sqrt
     v = y * rad * reciprocal_sqrt
@@ -99,7 +103,7 @@ def _fgs_disc_to_square(u, v):
     fouru2v2 = 4.0 * uv * uv
     rad = r2 * (r2 - fouru2v2)
     sgnuv = _sgn(uv)
-    sqrto = _sqrt(0.5 * (r2 - _sqrt(rad)))
+    sqrto = math.sqrt(0.5 * (r2 - math.sqrt(rad)))
 
     if abs(u) > _epsilon:
         y = sgnuv / u * sqrto
@@ -113,16 +117,20 @@ def _fgs_disc_to_square(u, v):
 # https://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
 def _elliptical_square_to_disc(x, y):
     try:
-        return x * _sqrt(1.0 - y * y / 2.0), y * _sqrt(1.0 - x * x / 2.0)
+        return x * math.sqrt(1.0 - y * y / 2.0), y * math.sqrt(1.0 - x * x / 2.0)
     except ValueError:  # sqrt of a negative number
         return None
 
 
-# TODO: goes outside original circle in some places
 def _elliptical_disc_to_square(u, v):
     u2 = u * u
     v2 = v * v
-    twosqrt2 = 2.0 * _sqrt(2.0)
+    r2 = u2 + v2
+
+    if r2 > 1:  # we're outside the disc
+        return
+
+    twosqrt2 = 2.0 * math.sqrt(2.0)
     subtermx = 2.0 + u2 - v2
     subtermy = 2.0 - u2 + v2
     termx1 = subtermx + u * twosqrt2
@@ -130,16 +138,16 @@ def _elliptical_disc_to_square(u, v):
     termy1 = subtermy + v * twosqrt2
     termy2 = subtermy - v * twosqrt2
     try:
-        x = 0.5 * _sqrt(termx1) - 0.5 * _sqrt(termx2)
-        y = 0.5 * _sqrt(termy1) - 0.5 * _sqrt(termy2)
+        x = 0.5 * math.sqrt(termx1) - 0.5 * math.sqrt(termx2)
+        y = 0.5 * math.sqrt(termy1) - 0.5 * math.sqrt(termy2)
         return x, y
     except ValueError:  # sqrt of a negative number
         return None
 
 
 # if the coordinate is an index in an image it's between 0 and the length of the image
-# we need it to be between -1 and 1 for the math
-def _pixel_coordinates_to_one(coordinate, max_value):
+# we need it to be between -1 and 1 (unit circle coordinates) for the math
+def _pixel_coordinates_to_unit(coordinate, max_value):
     return coordinate / max_value * 2 - 1
 
 
@@ -158,14 +166,14 @@ def _check_that_all_sides_are_the_same_length(inp):
 
 
 def _get_zero_pixel_value(pixel):
-    if isinstance(pixel, _Iterable):
+    if isinstance(pixel, collections.abc.Iterable):
         return type(pixel)(0 for _ in pixel)
     return 0
 
 
 def _zeros_like(inp):
-    if _HAS_NUMPY and isinstance(inp, _np.ndarray):
-        return _np.zeros_like(inp)
+    if _HAS_NUMPY and isinstance(inp, numpy.ndarray):
+        return numpy.zeros_like(inp)
 
     zero = _get_zero_pixel_value(inp[0][0])
     return [[zero] * len(inp) for _ in inp]
@@ -180,13 +188,12 @@ def _transform(inp, coordinate_transformer=_fgs_square_to_disc):
     result = _zeros_like(inp)
 
     for x, row in enumerate(inp):
-        # convert pixel coordinates to TODO: what is this called? it's not a unit square
         # x and y are in the range(0, len(inp)) but they need to be between -1 and 1
         # for the code
-        unit_x = _pixel_coordinates_to_one(x, len(inp))
+        unit_x = _pixel_coordinates_to_unit(x, len(inp))
 
         for y, _ in enumerate(row):
-            unit_y = _pixel_coordinates_to_one(y, len(row))
+            unit_y = _pixel_coordinates_to_unit(y, len(row))
 
             try:
                 uv = coordinate_transformer(unit_x, unit_y)
@@ -199,7 +206,7 @@ def _transform(inp, coordinate_transformer=_fgs_square_to_disc):
 
                 # TODO: something smarter than flooring.
                 # maybe take a weighted average of the nearest 4 pixels
-                result[x][y] = inp[_floor(u)][_floor(v)]
+                result[x][y] = inp[math.floor(u)][math.floor(v)]
             except IndexError:
                 pass
 
