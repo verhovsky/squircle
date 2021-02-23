@@ -3,7 +3,6 @@ from PIL import Image
 import numpy as np
 from pathlib import Path
 import pytest
-from matplotlib import pyplot as plt
 from collections.abc import Iterable
 from numbers import Number
 
@@ -11,8 +10,8 @@ from numbers import Number
 TEST_IMAGE_PATH = Path("test_images")
 if not TEST_IMAGE_PATH.is_dir():
     raise SystemExit("ERROR: Couldn't find the directory containing the test images")
-square_image = TEST_IMAGE_PATH / "square_grid.png"
-circle_image = TEST_IMAGE_PATH / "circle.png"
+SQUARE_IMAGE = TEST_IMAGE_PATH / "square_grid.png"
+CIRCLE_IMAGE = TEST_IMAGE_PATH / "circle.png"
 
 
 def _convert_image_data_to_array(image):
@@ -23,8 +22,10 @@ def _convert_image_data_to_array(image):
     return pixels
 
 
-def _read_image(image_path, use_numpy=False):
-    image = Image.open(image_path)
+def _read_image(image_path, grayscale=False, use_numpy=False):
+    image = Image.open(image_path).convert("RGB")
+    if grayscale:
+        image = image.convert("L")
     if use_numpy:
         return np.asarray(image)
     return _convert_image_data_to_array(image)
@@ -34,9 +35,10 @@ def all_pixels_have_the_same_shape_as_the_first_pixel(array):
     first_pixel = array[0][0]
     for row_index, row in enumerate(array):
         for pixel_index, pixel in enumerate(row):
-            assert (
-                isinstance(pixel, Number) and isinstance(first_pixel, Number)
-            ) or len(pixel) == len(first_pixel)
+            if not isinstance(pixel, Number):
+                assert len(pixel) == len(first_pixel)
+            else:
+                assert type(pixel) is type(first_pixel)
 
 
 def sum_pixel_differences(first_image, second_image):
@@ -59,7 +61,7 @@ def sum_pixel_differences(first_image, second_image):
 
 
 def test_dimensions_remain_the_same():
-    square = _read_image(square_image)
+    square = _read_image(SQUARE_IMAGE)
     old_height = len(square)
     old_width = len(square[0])
 
@@ -70,21 +72,20 @@ def test_dimensions_remain_the_same():
 
 
 def test_mismatched_height_and_width_errors_out():
-    square = _read_image(square_image)
+    square = _read_image(SQUARE_IMAGE)
     rectangle = np.vstack((square, square))
     with pytest.raises(ValueError):
         squircle.to_circle(rectangle)
 
 
-@pytest.mark.parametrize(
-    "filename,is_circle", [(square_image, False), (circle_image, True)]
-)
+@pytest.mark.parametrize("filename", [SQUARE_IMAGE, CIRCLE_IMAGE])
+@pytest.mark.parametrize("grayscale", (False, True))
+@pytest.mark.parametrize("use_numpy", (False, True))
 @pytest.mark.parametrize("method_name", squircle.methods)
-@pytest.mark.parametrize("use_numpy", (True, False))
-def test_convert_then_back_and_compare(filename, is_circle, method_name, use_numpy):
-    print(method_name)
-    original = _read_image(filename, use_numpy)
+def test_convert_then_back_and_compare(filename, grayscale, use_numpy, method_name):
+    original = _read_image(filename, grayscale, use_numpy)
 
+    is_circle = filename == CIRCLE_IMAGE
     if is_circle:
         converted = squircle.to_square(original, method_name)
         back_to_original = squircle.to_circle(converted, method_name)
@@ -96,6 +97,7 @@ def test_convert_then_back_and_compare(filename, is_circle, method_name, use_num
     assert len(original[0]) == len(back_to_original[0])
 
     if use_numpy:
+        print(grayscale, original.shape)
         assert not np.any(np.isnan(converted))
         assert not np.any(np.isinf(converted))
         assert not np.any(np.isnan(back_to_original))
@@ -104,18 +106,19 @@ def test_convert_then_back_and_compare(filename, is_circle, method_name, use_num
     for image in [original, converted, back_to_original]:
         all_pixels_have_the_same_shape_as_the_first_pixel(image)
 
-    total_difference = sum_pixel_differences(original, back_to_original)
-
-    average_difference = total_difference / (len(original) * len(original))
-
-    # TODO: how do I pass a command line argument to a parametrized test?
+    # TODO: toggle this with a command line argument to pytest
+    # from matplotlib import pyplot as plt
     # plt.subplot(1, 3, 1)
     # plt.imshow(original)
     # plt.subplot(1, 3, 2)
     # plt.imshow(np.array(converted))
     # plt.subplot(1, 3, 3)
     # plt.imshow(back_to_original)
+    # title = method_name + (" (with numpy)" if use_numpy else "")
+    # plt.suptitle(title)
     # plt.show()
 
+    total_difference = sum_pixel_differences(original, back_to_original)
+    average_difference = total_difference / (len(original) * len(original))
     # TODO: this is too high
-    assert average_difference < 500
+    assert average_difference < 400
