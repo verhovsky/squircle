@@ -53,9 +53,6 @@ def _stretch_disc_to_square(u, v):
     v2 = v * v
     r2 = u2 + v2
 
-    if r2 > 1:  # we're outside the disc
-        return
-
     r = math.sqrt(r2)
 
     # a trick based on Dave Cline's idea
@@ -96,9 +93,6 @@ def _fgs_disc_to_square(u, v):
     v2 = v * v
     r2 = u2 + v2
 
-    if r2 > 1:  # we're outside the disc
-        return
-
     uv = u * v
     fouru2v2 = 4.0 * uv * uv
     rad = r2 * (r2 - fouru2v2)
@@ -126,9 +120,6 @@ def _elliptical_disc_to_square(u, v):
     u2 = u * u
     v2 = v * v
     r2 = u2 + v2
-
-    if r2 > 1:  # we're outside the disc
-        return
 
     twosqrt2 = 2.0 * math.sqrt(2.0)
     subtermx = 2.0 + u2 - v2
