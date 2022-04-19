@@ -54,14 +54,6 @@ https://mathproofs.blogspot.com/2005/07/mapping-square-to-circle.html
 
 https://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
 
-#### Schwarz-Christoffel conformal mapping
-
-`raise NotImplementedError`. The math is difficult.
-
-https://squircular.blogspot.com/2015/09/schwarz-christoffel-mapping.html
-
-http://jcgt.org/published/0005/02/01/
-
 ## Development
 
 After `pip install tox` you can run squircle's (limited) test set with
